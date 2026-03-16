@@ -31,8 +31,9 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📸 Demo
 
-- [ ] [Insert a screenshot of your fixed, winning game here]
+- [![alt text](image-1.png)] [Insert a screenshot of your fixed, winning game here]
 
 ## 🚀 Stretch Features
 
-- [ ] [If you choose to complete Challenge 4, insert a screenshot of your Enhanced Game UI here]
+- [![alt text](image.png)] [If you choose to complete Challenge 1, insert a screenshot of your Enhanced Game UI here]
+- I added the High Score feature using CoPilot AI since this allows users to see how well they've done when guessing numbers. CoPilot began by looking into all previous game files, then deciding wehre to add them. It then patched the files to have this bug and even made a test that checked specifically for this.

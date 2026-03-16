@@ -1,3 +1,6 @@
+import math
+
+
 def get_range_for_difficulty(difficulty: str):
     """Return (low, high) inclusive range for a given difficulty."""
     if difficulty == "Easy":
@@ -8,7 +11,8 @@ def get_range_for_difficulty(difficulty: str):
         return 1, 100
     return 1, 50
 
-# ERROR: might cause errors with boolean values
+# ERROR: I am unable to round guesses
+# FIX: changed so that all floats are now rounded instead of floored and all strings are stripped prior to converting to integer, using GitHub Copilot.
 def parse_guess(raw: str):
     if raw is None:
         return False, None, "Enter a guess."
@@ -19,39 +23,51 @@ def parse_guess(raw: str):
         return False, None, "Enter a guess."
 
     try:
-        if "." in raw:
-            value = round(float(raw)) # This should be a round(float(raw))
+        # Accept decimal/scientific notation while rejecting inf/nan values.
+        if any(marker in raw for marker in (".", "e", "E")):
+            number = float(raw)
+            if not math.isfinite(number):
+                raise ValueError("non-finite number")
+            value = round(number)
         else:
             value = int(raw)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return False, None, "That is not a number."
 
     return True, value, None
 
-#ERROR: This is 1000% broken
+# ERROR: The hints for the guesses are off.
+# FIX: Fixes general logic within the solution. Solved using pointers from Claude and by myself. 
 def check_guess(guess, secret):
-    if guess == secret:
+    try:
+        guess_value = int(guess)
+        secret_value = int(secret)
+    except (TypeError, ValueError):
+        guess_value = str(guess)
+        secret_value = str(secret)
+
+    if guess_value == secret_value:
         return "Win", "🎉 Correct!"
 
-    try:
-        if guess > secret:
-            return "Too High", "📈 Go LOWER!" # Should be LOWER
-        else:
-            return "Too Low", "📉 Go HIGHER!" # Should be HIGHER
-    except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:                      # See lines 40 & 42
-            return "Too High", "📈 Go LOWER!"
-        return "Too Low", "📉 Go HIGHER!"
+    if guess_value > secret_value:
+        return "Too High", "📈 Go LOWER!" # Should be LOWER
+    return "Too Low", "📉 Go HIGHER!" # Should be HIGHER
 
+# ERROR: Score updates are inaccurate.
+# FIX: Made every incorrect guess be a penalty, no matter the outcome, using GitHub CoPilot. I also made sure that the minimum score was always 10.
 def update_score(current_score: int, outcome: str, attempt_number: int):
     if outcome == "Win":
-        points = max(100 - 10 * (attempt_number - 1), 10)
+        safe_attempt = max(attempt_number, 1)
+        points = max(100 - 10 * (safe_attempt - 1), 10)
         return current_score + points
 
     if outcome in ("Too High", "Too Low"):
         return current_score - 5
 
     return current_score
+
+
+def update_high_score(current_high_score: int, current_score: int):
+    safe_high_score = max(current_high_score or 0, 0)
+    safe_current_score = max(current_score or 0, 0)
+    return max(safe_high_score, safe_current_score)

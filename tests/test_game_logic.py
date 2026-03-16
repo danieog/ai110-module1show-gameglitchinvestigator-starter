@@ -1,16 +1,23 @@
-from logic_utils import check_guess
+import pytest
 
-def test_winning_guess():
-    # If the secret is 50 and guess is 50, it should be a win
-    result = check_guess(50, 50)
-    assert result == "Win"
+from logic_utils import check_guess, get_range_for_difficulty
 
-def test_guess_too_high():
-    # If secret is 50 and guess is 60, hint should be "Too High"
-    result = check_guess(60, 50)
-    assert result == "Too High"
 
-def test_guess_too_low():
-    # If secret is 50 and guess is 40, hint should be "Too Low"
-    result = check_guess(40, 50)
-    assert result == "Too Low"
+@pytest.mark.parametrize(
+    "guess, expected_outcome",
+    [
+        (1, "Too Low"),
+        (19, "Too Low"),
+        (45, "Win"),
+        (86, "Too High"),
+    ],
+)
+def test_check_guess_hard_difficulty_with_specific_guesses(guess, expected_outcome):
+    # Hard difficulty should cover 1-100.
+    low, high = get_range_for_difficulty("Hard")
+    assert (low, high) == (1, 100)
+
+    # Use a fixed secret in hard range to validate outcomes for known guesses.
+    secret = 45
+    outcome, _message = check_guess(guess, secret)
+    assert outcome == expected_outcome

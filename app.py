@@ -1,69 +1,12 @@
 import random
 import streamlit as st
-
-# ERROR: Difficulty seems to be way off here
-# FIX: Changed ranges so that normal had a smaller range than hard, using Claude.
-def get_range_for_difficulty(difficulty: str):
-    if difficulty == "Easy":
-        return 1, 20
-    if difficulty == "Normal":
-        return 1, 50
-    if difficulty == "Hard":
-        return 1, 100
-    return 1, 50
-
-
-# ERROR: I am unable to round guesses
-# FIX: changed so that all floats are now rounded instead of floored and all strings are stripped prior to converting to integer, using GitHub Copilot.
-def parse_guess(raw: str):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    raw = raw.strip()
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = round(float(raw)) # This should be a round(float(raw))
-        else:
-            value = int(raw)
-    except (TypeError, ValueError):
-        return False, None, "That is not a number."
-
-    return True, value, None
-
-# ERROR: The hints for the guesses are off.
-# FIX: Fixes general logic within the solution. Solved using pointers from Claude and by myself. 
-def check_guess(guess, secret):
-    if guess == secret:
-        return "Win", "🎉 Correct!"
-
-    try:
-        if guess > secret:
-            return "Too High", "📈 Go LOWER!" # Should be LOWER
-        else:
-            return "Too Low", "📉 Go HIGHER!" # Should be HIGHER
-    except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:                      # See lines 40 & 42
-            return "Too High", "📈 Go LOWER!"
-        return "Too Low", "📉 Go HIGHER!"
-
-# ERROR: Score updates are inaccurate.
-# FIX: Made every incorrect guess be a penalty, no matter the outcome, using GitHub CoPilot. I also made sure that the minimum score was always 10.
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    if outcome == "Win":
-        points = max(100 - 10 * (attempt_number - 1), 10)
-        return current_score + points
-
-    if outcome in ("Too High", "Too Low"):
-        return current_score - 5
-
-    return current_score
+from logic_utils import (
+    check_guess,
+    get_range_for_difficulty,
+    parse_guess,
+    update_high_score,
+    update_score,
+)
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -102,6 +45,9 @@ if "attempts" not in st.session_state:
 if "score" not in st.session_state:
     st.session_state.score = 0
 
+if "high_score" not in st.session_state:
+    st.session_state.high_score = 0
+
 if "status" not in st.session_state:
     st.session_state.status = "playing"
 
@@ -117,17 +63,21 @@ if st.session_state.range != (low, high):
     st.session_state.status = "playing"
     st.session_state.history = []
 
+st.sidebar.metric("High Score", st.session_state.high_score)
+
 st.subheader("Make a guess")
 
 st.info(
     f"Guess a number between {low} and {high}. "
-    f"Attempts left: {max(attempt_limit - st.session_state.attempts, 0)}"
+    f"Attempts left: {max(attempt_limit - st.session_state.attempts, 0)} | "
+    f"High score: {st.session_state.high_score}"
 )
 
 with st.expander("Developer Debug Info"):
     st.write("Secret:", st.session_state.secret)
     st.write("Attempts:", st.session_state.attempts)
     st.write("Score:", st.session_state.score)
+    st.write("High Score:", st.session_state.high_score)
     st.write("Difficulty:", difficulty)
     st.write("History:", st.session_state.history)
 
@@ -149,7 +99,7 @@ if new_game:
     st.session_state.attempts = 0
     st.session_state.secret = random.randint(low, high)
     st.session_state.score = 0
-    st.session_state.status = "playing" # FIX: Each new game will now actually start!
+    st.session_state.status = "playing" # FIX: Each new game is now actually starting, CoPilot
     st.session_state.history = []
     st.success("New game started.")
     st.rerun()
@@ -181,6 +131,10 @@ if submit:
             current_score=st.session_state.score,
             outcome=outcome,
             attempt_number=st.session_state.attempts,
+        )
+        st.session_state.high_score = update_high_score(
+            current_high_score=st.session_state.high_score,
+            current_score=st.session_state.score,
         )
 
         if outcome == "Win":
