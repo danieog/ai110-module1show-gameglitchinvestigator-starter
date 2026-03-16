@@ -1,65 +1,66 @@
 import random
 import streamlit as st
 
+# ERROR: Difficulty seems to be way off here
+# FIX: Changed ranges so that normal had a smaller range than hard, using Claude.
 def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
         return 1, 20
     if difficulty == "Normal":
-        return 1, 100
-    if difficulty == "Hard":
         return 1, 50
-    return 1, 100
+    if difficulty == "Hard":
+        return 1, 100
+    return 1, 50
 
 
+# ERROR: I am unable to round guesses
+# FIX: changed so that all floats are now rounded instead of floored and all strings are stripped prior to converting to integer, using GitHub Copilot.
 def parse_guess(raw: str):
     if raw is None:
         return False, None, "Enter a guess."
+
+    raw = raw.strip()
 
     if raw == "":
         return False, None, "Enter a guess."
 
     try:
         if "." in raw:
-            value = int(float(raw))
+            value = round(float(raw)) # This should be a round(float(raw))
         else:
             value = int(raw)
-    except Exception:
+    except (TypeError, ValueError):
         return False, None, "That is not a number."
 
     return True, value, None
 
-
+# ERROR: The hints for the guesses are off.
+# FIX: Fixes general logic within the solution. Solved using pointers from Claude and by myself. 
 def check_guess(guess, secret):
     if guess == secret:
         return "Win", "🎉 Correct!"
 
     try:
         if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
+            return "Too High", "📈 Go LOWER!" # Should be LOWER
         else:
-            return "Too Low", "📉 Go LOWER!"
+            return "Too Low", "📉 Go HIGHER!" # Should be HIGHER
     except TypeError:
         g = str(guess)
         if g == secret:
             return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
+        if g > secret:                      # See lines 40 & 42
+            return "Too High", "📈 Go LOWER!"
+        return "Too Low", "📉 Go HIGHER!"
 
-
+# ERROR: Score updates are inaccurate.
+# FIX: Made every incorrect guess be a penalty, no matter the outcome, using GitHub CoPilot. I also made sure that the minimum score was always 10.
 def update_score(current_score: int, outcome: str, attempt_number: int):
     if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
+        points = max(100 - 10 * (attempt_number - 1), 10)
         return current_score + points
 
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
-
-    if outcome == "Too Low":
+    if outcome in ("Too High", "Too Low"):
         return current_score - 5
 
     return current_score
@@ -90,10 +91,13 @@ st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 
 if "secret" not in st.session_state:
-    st.session_state.secret = random.randint(low, high)
+    st.session_state.secret = random.randint(low, high) # FIX: Range now actually falls between low and high and not just 1 to 100. Claude fix.
+
+if "range" not in st.session_state:
+    st.session_state.range = (low, high) # FIX: Range now actually falls between low and high and not just 1 to 100. Claude fix.
 
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
+    st.session_state.attempts = 0
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -104,11 +108,20 @@ if "status" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+if st.session_state.range != (low, high):
+    # FIX: Starts a fresh game when difficulty changes so range/secret stay consistent. Made by GitHub CoPilot
+    st.session_state.range = (low, high)
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.attempts = 0
+    st.session_state.score = 0
+    st.session_state.status = "playing"
+    st.session_state.history = []
+
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
-    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+    f"Guess a number between {low} and {high}. "
+    f"Attempts left: {max(attempt_limit - st.session_state.attempts, 0)}"
 )
 
 with st.expander("Developer Debug Info"):
@@ -131,9 +144,13 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+# Have this actually work as a new button!
 if new_game:
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.score = 0
+    st.session_state.status = "playing" # FIX: Each new game will now actually start!
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 
@@ -154,12 +171,7 @@ if submit:
         st.error(err)
     else:
         st.session_state.history.append(guess_int)
-
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
-
+        secret = st.session_state.secret
         outcome, message = check_guess(guess_int, secret)
 
         if show_hint:
