@@ -25,9 +25,9 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+- This is a basic guessing game where the user guesses a value between two numbers depending on the difficulty in a specific number of guesses.
+- Some of the bugs I found were that the UI was essentially hard coded (no matter what I chose it always 1 to 100) and that the range for the secret number was always between 1 to 100 even if I chose easy as my difficulty.
+- I changed the hard coded values to {low} and {high} and made sure the secret number was within the actual range chose by the difficulty. 
 
 ## 📸 Demo
 

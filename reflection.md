@@ -9,8 +9,7 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
   (for example: "the hints were backwards").
 =======
   (for example: "the secret number kept changing" or "the hints were backwards").
-  When the game first started, the hints were not only backwards, but everytime I tried to start a new game after winning, it just would not let me. When I tried to answer lower, sometimes it would give me a hint that was way off, that ended up derailing my attempts at solving the game instead of being accurate and helping me. When I would try to start a new game, the new game button just would not work, instead of actually starting a new game. There was also some hard coding when it came to the difficulty.
-  I also found that the difficulty levels were off along with the rounding of various variables. 
+  When the game first started, the hints were not only backwards, but everytime I tried to start a new game after winning, it just would not let me. When I tried to answer lower, sometimes it would give me a hint that was way off, that ended up derailing my attempts at solving the game instead of being accurate and helping me. When I would try to start a new game, the new game button just would not work, instead of actually starting a new game. There was also some hard coding when it came to the difficulty. I also found that the difficulty levels were off along with the rounding of various variables. 
 ---
 
 ## 2. How did you use AI as a teammate?
@@ -33,7 +32,7 @@ I would first check any base cases relating to the bug, then begin to test any e
 ## 4. What did you learn about Streamlit and state?
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
-Streamlit reruns are essentially just ____. Streamlit's session state is just ____. 
+Streamlit reruns are equivalent to typing on your keyboard, and the session state is just your screen after each key is typed. This is because reruns directly affect the session states, even misclicks, or in the example's case, typing errors. 
 ---
 
 ## 5. Looking ahead: your developer habits
@@ -42,4 +41,4 @@ Streamlit reruns are essentially just ____. Streamlit's session state is just __
   - This could be a testing habit, a prompting strategy, or a way you used Git.
 - What is one thing you would do differently next time you work with AI on a coding task?
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
-One habit I learned from this project I plan on reusing is _____. One thing I would do more differently is ____. This project changed the way I thought about AI generated code by _____.
+One habit I learned from this project I plan on reusing is having AI point out the errors for me, since they did steamline my process by a lot. One thing I would do more differently is have my AI be a lot more concise when giving explanations as I felt I had to still constantly change my code no matter what. This project changed the way I thought about AI generated code by making me realize that it isn't too bad.
