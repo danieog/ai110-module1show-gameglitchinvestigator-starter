@@ -29,7 +29,7 @@ It wrote the code, ran away, and now the game is unplayable.
 - Some of the bugs I found were that the UI was essentially hard coded (no matter what I chose it always 1 to 100) and that the range for the secret number was always between 1 to 100 even if I chose easy as my difficulty.
 - I changed the hard coded values to {low} and {high} and made sure the secret number was within the actual range chose by the difficulty. 
 
-## 📸 Demo
+##  Demo
 
 - [![alt text](image-1.png)] [Insert a screenshot of your fixed, winning game here]
 
@@ -37,3 +37,5 @@ It wrote the code, ran away, and now the game is unplayable.
 
 - [![alt text](image.png)] [If you choose to complete Challenge 1, insert a screenshot of your Enhanced Game UI here]
 - I added the High Score feature using CoPilot AI since this allows users to see how well they've done when guessing numbers. CoPilot began by looking into all previous game files, then deciding wehre to add them. It then patched the files to have this bug and even made a test that checked specifically for this.
+- [![alt text](image-2.png)
+![alt text](image-3.png)] [If you choose to complete Challenge 4, insert a screenshot of your Enhanced Game UI here]

@@ -73,6 +73,11 @@ st.info(
     f"High score: {st.session_state.high_score}"
 )
 
+stats_col1, stats_col2, stats_col3 = st.columns(3)
+stats_col1.metric("Attempts Used", st.session_state.attempts)
+stats_col2.metric("Current Score", st.session_state.score)
+stats_col3.metric("Attempts Left", max(attempt_limit - st.session_state.attempts, 0))
+
 with st.expander("Developer Debug Info"):
     st.write("Secret:", st.session_state.secret)
     st.write("Attempts:", st.session_state.attempts)
@@ -118,14 +123,25 @@ if submit:
 
     if not ok:
         st.session_state.history.append(raw_guess)
-        st.error(err)
+        st.error(f"Input error: {err}")
     else:
         st.session_state.history.append(guess_int)
         secret = st.session_state.secret
         outcome, message = check_guess(guess_int, secret)
 
+        st.markdown("### Guess Result")
+        st.write(
+            f"Attempt {st.session_state.attempts} of {attempt_limit} | "
+            f"Your guess: {guess_int}"
+        )
+
         if show_hint:
-            st.warning(message)
+            if outcome == "Too High":
+                st.error(f"Hint: {message}")
+            elif outcome == "Too Low":
+                st.info(f"Hint: {message}")
+            else:
+                st.success(f"Hint: {message}")
 
         st.session_state.score = update_score(
             current_score=st.session_state.score,
@@ -154,4 +170,10 @@ if submit:
                 )
 
 st.divider()
+
+if st.session_state.history:
+    st.subheader("Guess History")
+    st.caption("Most recent guess appears last.")
+    st.write(" | ".join(str(item) for item in st.session_state.history))
+
 st.caption("Built by an AI that claims this code is production-ready.")
